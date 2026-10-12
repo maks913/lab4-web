@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:f="jakarta.faces.core"
+      xmlns:h="jakarta.faces.html"
+      xmlns:p="primefaces">
+<f:view>
+    <h:head>
+        <h:outputStylesheet library="css" name="styles.css"/>
+    </h:head>
+    <h:body>
+        <p:growl id="growl" showDetail="true"/>
+
+        <p:dialog id="dialog-create-vacancy"
+                  header="Create vacancy"
+                  widgetVar="dialog-create-vacancy"
+                  showEffect="fade"
+                  closeOnEscape="true"
+                  modal="true"
+                  dismissibleMask="true">
+            <h:form>
+                <h:panelGrid columns="1">
+                    <h:outputLabel value="Title vacancy" for="title"/>
+                    <p:inputText id="title" placeholder="Title" value="#{vacancyBean.vacancy.title}"/>
+
+                    <h:outputLabel value="City" for="city"/>
+                    <p:inputText id="city" placeholder="City" value="#{vacancyBean.vacancy.city}"/>
+
+                    <h:outputLabel value="Salary" for="salary"/>
+                    <p:inputText id="salary" placeholder="Salary" value="#{vacancyBean.vacancy.salary}"/>
+
+                    <h:outputLabel value="Company" for="companySelect"/>
+                    <p:selectOneMenu id="companySelect"
+                                     value="#{vacancyBean.vacancy.companyDto}"
+                                     converter="omnifaces.SelectItemsConverter">
+                        <f:selectItem itemLabel="Select company" itemValue="#{null}"/>
+                        <f:selectItems value="#{companyBean.companies}"
+                                       var="item"
+                                       itemLabel="#{item.name}"
+                                       itemValue="#{item}"/>
+                    </p:selectOneMenu>
+
+                    <p:commandButton type="submit"
+                                     value="Create vacancy"
+                                     action="#{vacancyBean.createVacancy()}"
+                                     update="@form, dialog-create-vacancy, form-table, growl"/>
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+        <p:dialog id="dialog-update-vacancy"
+                  header="Update vacancy"
+                  widgetVar="dialog-update-vacancy"
+                  showEffect="fade"
+                  closeOnEscape="true"
+                  modal="true"
+                  dismissibleMask="true">
+            <h:form id="form-update-vacancy">
+                <h:panelGrid columns="1">
+                    <h:inputHidden value="#{vacancyBean.updateVacancy.id}"/>
+                    <h:outputLabel value="ID vacancy" for="id"/>
+                    <p:inputText id="id" placeholder="ID" value="#{vacancyBean.updateVacancy.id}" readonly="true"/>
+
+                    <h:outputLabel value="Title vacancy" for="title"/>
+                    <p:inputText id="title" placeholder="Title" value="#{vacancyBean.updateVacancy.title}"/>
+
+                    <h:outputLabel value="City" for="city"/>
+                    <p:inputText id="city" placeholder="City" value="#{vacancyBean.updateVacancy.city}"/>
+
+                    <h:outputLabel value="Salary" for="salary"/>
+                    <p:inputText id="salary" placeholder="Salary" value="#{vacancyBean.updateVacancy.salary}"/>
+
+                    <h:outputLabel value="Company" for="companySelect"/>
+                    <p:selectOneMenu id="companySelect"
+                                     value="#{vacancyBean.updateVacancy.companyDto}"
+                                     converter="omnifaces.SelectItemsConverter">
+                        <f:selectItems value="#{companyBean.companies}"
+                                       var="item"
+                                       itemLabel="#{item.name}"
+                                       itemValue="#{item}"/>
+                    </p:selectOneMenu>
+
+                    <p:commandButton type="submit"
+                                     value="Update vacancy"
+                                     action="#{vacancyBean.updateVacancy()}"
+                                     update="@form, dialog-update-vacancy, form-table, growl"/>
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+        <p:dialog id="dialog-create-company"
+                  header="Create company"
+                  widgetVar="dialog-create-company"
+                  showEffect="fade"
+                  closeOnEscape="true"
+                  modal="true"
+                  dismissibleMask="true">
+            <h:form>
+                <h:panelGrid columns="1">
+                    <h:outputLabel value="Name company" for="name"/>
+                    <p:inputText id="name"
+                                 placeholder="Name"
+                                 value="#{companyBean.company.name}"/>
+
+                    <h:outputLabel value="Quantity employees"
+                                   for="employees"/>
+                    <p:inputText id="employees"
+                                 placeholder="Qunatity employees"
+                                 value="#{companyBean.company.quantityEmployees}"/>
+
+                    <h:outputLabel value="decription"
+                                   for="description"/>
+                    <p:inputTextarea id="description"
+                                     placeholder="Enter description..."
+                                     value="#{companyBean.company.description}"/>
+
+                    <p:commandButton value="Create company"
+                                     action="#{companyBean.createCompany()}"
+                                     update="@form, dialog-create-company,
+                                     form-companies, growl, dialog-create-vacancy, form-update-vacancy"
+                                     onclick="PF('dialog-create-company').hide()"/>
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+        <p:dialog id="dialog-update-company"
+                  widgetVar="dialog-update-company"
+                  header="Edit Company"
+                  modal="true">
+            <h:form id="form-update-company">
+                <h:inputHidden value="#{companyBean.updateCompany.id}"/>
+                <h:panelGrid columns="1">
+                    <h:inputHidden value="#{companyBean.updateCompany.createdAt}">
+                        <f:convertDateTime type="localDateTime" pattern="yyyy-MM-dd'T'HH:mm:ss.SSSSSS"/>
+                    </h:inputHidden>
+                    <p:inputText value="#{companyBean.updateCompany.name}"/>
+                    <p:inputText value="#{companyBean.updateCompany.quantityEmployees}"/>
+                    <p:inputTextarea value="#{companyBean.updateCompany.description}"/>
+
+                    <p:commandButton value="Save"
+                                     action="#{companyBean.updateCompany()}"
+                                     update="form-companies, growl, form-update-vacancy, dialog-create-vacancy"
+                                     onclick="PF('dialog-update-company').hide()"/>
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <div class="vacancies-container">
+            <div style="display: flex;flex-direction: row;justify-content: space-between;align-items: center">
+                <h1>Vacancies</h1>
+                <p:commandButton class="btn-create"
+                                 type="button" id="btn-create-vacancy"
+                                 value="Create vacancy"
+                                 onclick="PF('dialog-create-vacancy').show()"/>
+            </div>
+            <h:form id="form-table">
+                <p:confirmPopup global="true">
+                    <p:commandButton value="No" type="button" styleClass="ui-confirm-popup-no ui-button-flat"
+                                     icon="pi pi-times"/>
+                    <p:commandButton value="Yes" type="button" styleClass="ui-confirm-popup-yes ui-button-danger"
+                                     icon="pi pi-check"/>
+                </p:confirmPopup>
+                <p:dataTable value="#{vacancyBean.vacancies}"
+                             var="v"
+                             id="vacancy-table"
+                             paginator="true"
+                             paginatorPosition="bottom"
+                             rows="7">
+                    <p:column>
+                        <f:facet name="header">ID</f:facet>
+                        <h:outputText value="#{v.id}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Title</f:facet>
+                        <h:outputText value="#{v.title}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">City</f:facet>
+                        <h:outputText value="#{v.city}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Salary</f:facet>
+                        <h:outputText value="#{v.salary}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Company</f:facet>
+                        <h:outputText value="#{v.companyDto.name}"/>
+                    </p:column>
+                    <p:column>
+                        <f:facet name="header">Actions</f:facet>
+                        <p:commandButton style="margin-right: 5px;"
+                                         value="Update"
+                                         styleClass="primary"
+                                         action="#{vacancyBean.setUpdateVacancy(v.id)}"
+                                         onclick="PF('dialog-update-vacancy').show()"
+                                         update="form-update-vacancy"/>
+                        <p:commandButton icon="pi pi-trash"
+                                         styleClass="ui-button-danger"
+                                         action="#{vacancyBean.deleteVacancy(v.id)}"
+                                         update="@form, growl">
+                            <p:confirm type="popup"
+                                       header="Delete vacancy"
+                                       icon="pi pi-exclamation-triangle"
+                                       message="Are you sure you want delete this vacancy?"/>
+                        </p:commandButton>
+                    </p:column>
+                </p:dataTable>
+            </h:form>
+        </div>
+        <div class="companies-container">
+            <div style="display: flex;flex-direction: row;justify-content: space-between; align-items: center">
+                <h1>Companies</h1>
+                <p:commandButton type="button"
+                                 class="btn-create"
+                                 id="btn-create-company"
+                                 value="Create company"
+                                 onclick="PF('dialog-create-company').show()"/>
+            </div>
+            <h:form id="form-companies">
+                <p:confirmDialog global="true" showEffect="fade" hideEffect="fade" responsive="true" width="350">
+                    <p:commandButton value="No" type="button" styleClass="ui-confirmdialog-no ui-button-flat"
+                                     icon="pi pi-times"/>
+                    <p:commandButton value="Yes" type="button" styleClass="ui-confirmdialog-yes ui-button-danger"
+                                     icon="pi pi-check"/>
+                </p:confirmDialog>
+                <p:dataView id="data-view-company"
+                            value="#{companyBean.companies}"
+                            var="c"
+                            rows="3"
+                            paginator="true"
+                            layout="grid"
+                            paginatorPosition="bottom"
+                            gridIcon="pi pi-th-large">
+                    <p:dataViewGridItem>
+                        <div class="company-card">
+                            <div class="company-header">
+                                <span class="company-title">Name: <p:outputLabel value=" #{c.name}"/></span>
+                                <span class="company-id">ID: <h:outputText value="#{c.id}"/></span>
+                            </div>
+                            <div class="company-body">
+                                <div class="company-info-row">
+                                    <span class="label">Quantity Employees:</span>
+                                    <span class="value"><p:outputLabel value="#{c.quantityEmployees}"/></span>
+                                </div>
+                                <div class="company-info-row">
+                                    <span class="label">Created at:</span>
+                                    <span class="value">
+                                        <h:outputText value="#{c.createdAt}">
+                                            <f:convertDateTime pattern="dd.MM.yyyy HH:mm" type="localDateTime"/>
+                                        </h:outputText>
+                                    </span>
+                                </div>
+                                <div class="company-description">
+                                    <span class="label">Description:</span>
+                                    <p:inputTextarea value="#{c.description}" rows="2" readonly="true"/>
+                                </div>
+                            </div>
+
+                            <p:commandButton style="margin-right: 5px;"
+                                             icon="pi pi-trash"
+                                             styleClass="ui-button-danger"
+                                             action="#{companyBean.deleteCompany(c.id)}"
+                                             update="@form, growl, dialog-create-vacancy, dialog-update-vacancy">
+                                <p:confirm header="Delete company"
+                                           icon="pi pi-exclamation-triangle"
+                                           message="Are you sure you want delete this company?"/>
+                            </p:commandButton>
+
+                            <p:commandButton icon="pi pi-pencil"
+                                             value="Edit"
+                                             action="#{companyBean.setUpdateCompany(c)}"
+                                             update="form-update-company, growl"
+                                             onclick="PF('dialog-update-company').show()"/>
+                        </div>
+                    </p:dataViewGridItem>
+                </p:dataView>
+            </h:form>
+        </div>
+
+    </h:body>
+</f:view>
+</html>
